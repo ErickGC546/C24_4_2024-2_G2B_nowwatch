@@ -1,10 +1,11 @@
 import { Navbar } from "./components/Navbar"
+import { Canales } from "./components/canales" 
 
 export const App = () => {
   return (
     <>
       <Navbar />
-      <h1>Lista de Canales</h1>
+      <Canales />
     </>
   )
 }
