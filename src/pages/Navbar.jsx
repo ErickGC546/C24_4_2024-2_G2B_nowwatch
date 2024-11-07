@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, Outlet } from 'react-router-dom';
 
 export const Navbar = () => {
     const [isNavOpen, setIsNavOpen] = useState(false);
@@ -9,7 +10,7 @@ export const Navbar = () => {
 
     return (
         <>
-            <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
+            <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body fixed-top" data-bs-theme="dark">
                 <div className="container-fluid">
                     <button
                         className="navbar-toggler me-3"
@@ -24,7 +25,7 @@ export const Navbar = () => {
                         <span className="navbar-toggler-icon"></span>
                     </button>
 
-                    <a className="navbar-brand d-flex align-items-center" href="#">
+                    <a className="navbar-brand d-flex align-items-center" href="/">
                         <img 
                             src="https://img.freepik.com/vector-premium/pictograma-tv-pantalla-television-icono-negro-redondo_53562-15456.jpg?w=740" 
                             height="30" 
@@ -38,14 +39,12 @@ export const Navbar = () => {
                     <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
                         <ul className="navbar-nav">
                             <li className="nav-item">
-                                <a className="nav-link text-white" href="#">Tv en vivo</a>
+                                <Link className="nav-link text-white" to="/">Tv en vivo</Link>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link text-white" href="#">Categorias</a>
+                                <Link className="nav-link text-white" to="/categoria">Categorias</Link>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link text-white" href="#">Buscar</a>
-                            </li>
+                            <li className="nav-item"><Link className="nav-link text-white" to="/buscar">Buscar</Link></li>
                         </ul>
                     </div>
 
@@ -66,12 +65,15 @@ export const Navbar = () => {
                             />
                         </a>
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
-                            <li><a className="dropdown-item" href="#">Registrarse</a></li>
-                            <li><a className="dropdown-item" href="#">Acceso</a></li>
+                            <li><Link className="dropdown-item" to="/register">Registrarse</Link></li>
+                            <li><Link className="dropdown-item" to="/login">Acceso</Link></li>
                         </ul>
                     </div>
                 </div>
             </nav>
+            <Outlet />
         </>
     );
 }
+
+export default Navbar;

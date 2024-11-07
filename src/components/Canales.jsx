@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Hls from 'hls.js';
-import './Canales.css';
+import { fetchChannels } from '../services/channelService';
+import '../styles/Canales.css';
 
 export const Canales = () => {
   const [channels, setChannels] = useState([]);
@@ -9,21 +10,20 @@ export const Canales = () => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    const fetchChannels = async () => {
+    const loadChannels = async () => {
       try {
-        const response = await fetch('https://iptv-org.github.io/iptv/languages/spa.m3u');
-        const data = await response.text();
+        const data = await fetchChannels();
         const parsedChannels = parseM3U(data);
         setChannels(parsedChannels);
         if (parsedChannels.length > 0) {
           setCurrentChannel(parsedChannels[0]);
         }
       } catch (error) {
-        console.error('Error fetching the m3u file:', error);
+        console.error('Error loading channels:', error);
       }
     };
 
-    fetchChannels();
+    loadChannels();
   }, []);
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export const Canales = () => {
 
       {visibleChannels < channels.length && (
         <center>
-          <button onClick={loadMoreChannels} className="load-more-button">
+          <button onClick={loadMoreChannels} className="boton-elegante">
             Cargar más
           </button>
         </center>
@@ -120,3 +120,5 @@ export const Canales = () => {
     </div>
   );
 };
+
+export default Canales;
