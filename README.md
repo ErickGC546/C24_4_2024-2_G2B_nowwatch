@@ -50,8 +50,8 @@ Este proyecto es un esfuerzo colaborativo, en el que trabajamos en equipo para d
 - **Backend (Autenticación y Servicios):** Desarrollado en **Spring Boot**, responsable de la gestión segura de usuarios y la comunicación eficiente entre el frontend y los servicios de contenido.
 
 **Colaboradores:**
-- Erick Galindo [Erick/proyect_react](https://github.com/ErickGC546/Proyec-React) (Frontend en Web).
-- Alex Huancahuari [Alex/proyect_SpringBoot](https://github.com/livecodingx/PI_2_2024_4C24_noWatch) (Backend del todo el proyecto).  
+- Alex Huancahuari [Alex/proyect_SpringBoot](https://github.com/livecodingx/PI_2_2024_4C24_noWatch) (Backend del todo el proyecto).
+- Rodrigo Contreras [Rodrigo/proyect_Kotlin](https://github.com/Aley-r-t/Integrador.git) (Frontend en Movil).
 
 ## 6. **Perspectivas Futuras**
 
