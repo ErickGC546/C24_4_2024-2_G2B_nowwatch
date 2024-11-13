@@ -2,7 +2,7 @@ import Canales from '../components/canales'
 
 function Buscar() {
   return  <div>
-    <Canales /> 
+    <h1>Hola desde buscar</h1>
   </div>;
 }
 export default Buscar;
