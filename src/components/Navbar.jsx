@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 
-export const Navbar = () => {
+const Navbar = () => {
     const [isNavOpen, setIsNavOpen] = useState(false);
 
     const handleToggle = () => {
@@ -44,7 +44,9 @@ export const Navbar = () => {
                             <li className="nav-item">
                                 <Link className="nav-link text-white" to="/categoria">Categorias</Link>
                             </li>
-                            <li className="nav-item"><Link className="nav-link text-white" to="/buscar">Buscar</Link></li>
+                            <li className="nav-item">
+                                <Link className="nav-link text-white" to="/buscar">Buscar</Link>
+                            </li>
                         </ul>
                     </div>
 
