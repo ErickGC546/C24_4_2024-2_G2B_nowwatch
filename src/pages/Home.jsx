@@ -1,4 +1,4 @@
-import Canales from '../components/canales'
+import Canales from '../components/Canales'
 
 function Home() {
   return  <div>
