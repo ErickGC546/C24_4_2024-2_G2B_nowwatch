@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react'; 
 import Hls from 'hls.js';
 import { fetchChannels } from '../services/channelService';
+import Navbar from './Navbar';
 import '../styles/Canales.css';
 
 export const Canales = () => {
   const [channels, setChannels] = useState([]);
+  const [filteredChannels, setFilteredChannels] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
   const [visibleChannels, setVisibleChannels] = useState(5);
   const videoRef = useRef(null);
@@ -15,6 +17,7 @@ export const Canales = () => {
         const data = await fetchChannels();
         const parsedChannels = parseM3U(data);
         setChannels(parsedChannels);
+        setFilteredChannels(parsedChannels); // Inicialmente, los canales filtrados son todos
         if (parsedChannels.length > 0) {
           setCurrentChannel(parsedChannels[0]);
         }
@@ -61,6 +64,17 @@ export const Canales = () => {
     return channels;
   };
 
+  const handleSearch = (searchTerm) => {
+    if (searchTerm === '') {
+      setFilteredChannels(channels);
+    } else {
+      const filtered = channels.filter(channel => 
+        channel.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredChannels(filtered);
+    }
+  };
+
   const handleChannelChange = (channel) => {
     setCurrentChannel(channel);
 
@@ -76,6 +90,9 @@ export const Canales = () => {
 
   return (
     <div className="container">
+      {/* Pasar la función handleSearch al Navbar */}
+      <Navbar onSearch={handleSearch} />
+
       <h1>Reproductor de Canales IPTV</h1>
       {currentChannel && currentChannel.url ? (
         <div className="video-container">
@@ -94,7 +111,7 @@ export const Canales = () => {
 
       <h2>Lista de Canales</h2>
       <div className="channel-list">
-        {channels.slice(0, visibleChannels).map((channel, index) => (
+        {filteredChannels.slice(0, visibleChannels).map((channel, index) => (
           <div
             key={index}
             onClick={() => handleChannelChange(channel)}
@@ -110,7 +127,7 @@ export const Canales = () => {
         ))}
       </div>
 
-      {visibleChannels < channels.length && (
+      {visibleChannels < filteredChannels.length && (
         <center>
           <button onClick={loadMoreChannels} className="boton-elegante">
             Cargar más

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { Link, Outlet } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ onSearch }) => {
     const [isNavOpen, setIsNavOpen] = useState(false);
 
     const handleToggle = () => {
@@ -45,7 +45,13 @@ const Navbar = () => {
                                 <Link className="nav-link text-white" to="/categoria">Categorias</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link text-white" to="/buscar">Buscar</Link>
+                                {/* Campo de búsqueda */}
+                                <input
+                                    type="text"
+                                    placeholder="Buscar canales"
+                                    className="form-control"
+                                    onChange={(e) => onSearch(e.target.value)}
+                                />
                             </li>
                         </ul>
                     </div>
