@@ -12,6 +12,7 @@ const Navbar = ({ onSearch }) => {
         <>
             <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body fixed-top" data-bs-theme="dark">
                 <div className="container-fluid">
+                    {/* Botón de menú responsivo */}
                     <button
                         className="navbar-toggler me-3"
                         type="button"
@@ -25,6 +26,7 @@ const Navbar = ({ onSearch }) => {
                         <span className="navbar-toggler-icon"></span>
                     </button>
 
+                    {/* Logo y nombre */}
                     <a className="navbar-brand d-flex align-items-center" href="/">
                         <img 
                             src="https://img.freepik.com/vector-premium/pictograma-tv-pantalla-television-icono-negro-redondo_53562-15456.jpg?w=740" 
@@ -36,7 +38,8 @@ const Navbar = ({ onSearch }) => {
                         <span className="text-white">noWatch</span>
                     </a>
 
-                    <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    {/* Menú colapsable */}
+                    <div className={`collapse navbar-collapse justify-content-center ${isNavOpen ? 'show' : ''}`} id="navbarNav">
                         <ul className="navbar-nav">
                             <li className="nav-item">
                                 <Link className="nav-link text-white" to="/">Tv en vivo</Link>
@@ -56,7 +59,8 @@ const Navbar = ({ onSearch }) => {
                         </ul>
                     </div>
 
-                    <div className={`dropdown ms-auto ${isNavOpen ? 'd-none' : ''}`}>
+                    {/* Ícono de usuario, oculto cuando el menú está abierto */}
+                    <div className={`dropdown ms-auto ${isNavOpen ? 'd-none' : 'd-lg-flex'}`}>
                         <a 
                             href="#" 
                             className="d-flex align-items-center" 

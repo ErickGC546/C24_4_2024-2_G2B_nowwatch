@@ -1,0 +1,104 @@
+
+.login-container {
+  background-color: rgba(255, 255, 255, 0.692);
+  border-radius: 15px;
+  box-shadow: 0 20px 20px rgba(32, 38, 88, 0.2);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 10rem;
+}
+
+.login-form h2 {
+  text-align: center;
+  color: #6e8efb;
+  margin-bottom: 1.5rem;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.input-group input:focus {
+  border-color: #6e8efb;
+  outline: none;
+  box-shadow: 0 0 5px rgba(110, 142, 251, 0.5);
+}
+
+.login-btn {
+  background: #4285f4;
+  color: #fff;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-btn:hover {
+  background: #357ae8;
+}
+
+.google-login-btn {
+  background: #4285f4;
+  color: #fff;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.google-login-btn:hover {
+  background: #357ae8;
+}
+
+.google-login-btn svg {
+  font-size: 2rem;
+}
+
+.signup-prompt {
+  text-align: center;
+  margin-top: 1rem;
+  color: #555;
+}
+
+.signup-prompt a {
+  color: #6e8efb;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signup-prompt a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 2rem; /* Aumenta el padding interno para no estar pegado a los costados */
+  }
+}
