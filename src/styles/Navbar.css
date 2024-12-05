@@ -1,0 +1,9 @@
+.hidden-user-icon {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .hidden-user-icon {
+        display: flex !important;
+    }
+}

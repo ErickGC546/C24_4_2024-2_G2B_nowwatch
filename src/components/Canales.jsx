@@ -93,7 +93,6 @@ export const Canales = () => {
       {/* Pasar la función handleSearch al Navbar */}
       <Navbar onSearch={handleSearch} />
 
-      <h1>Reproductor de Canales IPTV</h1>
       {currentChannel && currentChannel.url ? (
         <div className="video-container">
           <h2>Canal: {currentChannel.name}</h2>
@@ -108,7 +107,7 @@ export const Canales = () => {
       ) : (
         <p>No hay un canal seleccionado o el canal actual no tiene una URL válida.</p>
       )}
-
+      <br />
       <h2>Lista de Canales</h2>
       <div className="channel-list">
         {filteredChannels.slice(0, visibleChannels).map((channel, index) => (
@@ -130,7 +129,7 @@ export const Canales = () => {
       {visibleChannels < filteredChannels.length && (
         <center>
           <button onClick={loadMoreChannels} className="boton-elegante">
-            Cargar más
+            Ver más canales
           </button>
         </center>
       )}

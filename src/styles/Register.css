@@ -1,0 +1,81 @@
+.register-container {
+  background-color: rgba(255, 255, 255, 0.692);
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 5rem;
+}
+  
+  
+  .register-form h2 {
+    text-align: center;
+    color: #6e8efb;
+    margin-bottom: 1.5rem;
+  }
+  
+  .input-group {
+    margin-bottom: 1rem;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #555;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  .input-group input:focus {
+    border-color: #6e8efb;
+    outline: none;
+    box-shadow: 0 0 5px rgba(110, 142, 251, 0.5);
+  }
+  
+  .register-btn {
+    background: #4285f4;
+    color: #fff;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+    width: 100%;
+  }
+  
+  .register-btn:hover {
+    background: #357ae8;
+  }
+  
+  .login-prompt {
+    text-align: center;
+    margin-top: 1rem;
+    color: #555;
+  }
+  
+  .login-prompt a {
+    color: #6e8efb;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .login-prompt a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Responsiveness */
+  @media (max-width: 480px) {
+    .register-container {
+      padding: 1.5rem;
+    }
+  }
+  
