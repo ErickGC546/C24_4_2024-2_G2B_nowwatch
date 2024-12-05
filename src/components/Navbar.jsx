@@ -1,11 +1,69 @@
-import React, { useState } from 'react'; 
-import { Link, Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 const Navbar = ({ onSearch }) => {
     const [isNavOpen, setIsNavOpen] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     const handleToggle = () => {
         setIsNavOpen(!isNavOpen);
+    };
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                setUserProfile(null);
+                return;
+            }
+
+            try {
+                const res = await axios.get('http://localhost:8080/profile/user', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setUserProfile(res.data);
+            } catch (error) {
+                setError('No se pudo obtener el perfil');
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleLoginSuccess = async (credentialResponse) => {
+        const { credential } = credentialResponse;
+        try {
+            const response = await axios.post('http://localhost:8080/auth/callback/google', {
+                idToken: credential,
+            });
+
+            if (response.data.message === 'Authentication successful') {
+                const jwtToken = response.data.token;
+                
+                console.log('JWT recibido:', jwtToken);
+                localStorage.setItem('jwtToken', jwtToken);
+
+                navigate('/perfil');
+            }
+        } catch (error) {
+            console.error('Error durante la autenticación de Google:', error);
+            setError('Error en la autenticación');
+        }
+    };
+
+    const handleLoginFailure = (error) => {
+        console.error('Login failed:', error);
+        setError('Error en la autenticación');
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('jwtToken');
+        setUserProfile(null);
+        navigate('/');
     };
 
     return (
@@ -64,17 +122,43 @@ const Navbar = ({ onSearch }) => {
                             data-bs-toggle="dropdown" 
                             aria-expanded="false"
                         >
-                            <img 
-                                src="https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg" 
-                                alt="User Image" 
-                                width="30" 
-                                height="30" 
-                                className="rounded-circle"
-                            />
+                            {userProfile ? (
+                                <img 
+                                    src={userProfile.photo || "https://via.placeholder.com/150"}
+                                    alt="User Image" 
+                                    width="30" 
+                                    height="30" 
+                                    className="rounded-circle"
+                                />
+                            ) : (
+                                <img 
+                                    src="https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg" 
+                                    alt="User Image" 
+                                    width="30" 
+                                    height="30" 
+                                    className="rounded-circle"
+                                />
+                            )}
                         </a>
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
-                            <li><Link className="dropdown-item" to="/register">Registrarse</Link></li>
-                            <li><Link className="dropdown-item" to="/login">Acceso</Link></li>
+                            {userProfile ? (
+                                <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li>
+                            ) : (
+                                <li>
+                                    <GoogleLogin
+                                        onSuccess={handleLoginSuccess}
+                                        onError={handleLoginFailure}
+                                        useOneTap
+                                    />
+                                </li>
+                            )}
+                            {userProfile && (
+                                <li>
+                                    <button className="dropdown-item" onClick={handleLogout}>
+                                        Cerrar sesión
+                                    </button>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>

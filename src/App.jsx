@@ -2,9 +2,9 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from "./components/Navbar"
 import Home from './pages/Home'
 import Categoria from './pages/Categoria'
-import Login from './pages/Login'
-import Register from './pages/Register'
 import Buscar from './pages/Buscar'
+import Perfil from './pages/Perfil'
+
 
 
 export const App = () => {
@@ -15,8 +15,7 @@ export const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="categoria" element={<Categoria />} />
         <Route path="buscar" element={<Buscar />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        <Route path="/perfil" element={<Perfil />} />
       </Routes>
     </>
   );
