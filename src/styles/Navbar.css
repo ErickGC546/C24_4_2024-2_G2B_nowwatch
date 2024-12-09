@@ -1,9 +1,47 @@
-.hidden-user-icon {
-    display: none;
+.nav-link {
+    position: relative; /* Necesario para el subrayado */
+    font-weight: normal; /* Peso normal por defecto */
+}
+/* Negrita en estado activo o hover */
+.nav-link.active,
+.nav-link:hover {
+    font-weight: bold; 
+    color: #fff; 
 }
 
-@media (min-width: 992px) {
-    .hidden-user-icon {
-        display: flex !important;
-    }
+
+/* Contenedor de búsqueda */
+.position-relative {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+/* Input de búsqueda */
+.search-input {
+    padding: 0.4rem 2.5rem; /* Espaciado para dejar espacio al ícono */
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+}
+
+/* Estilo para el ícono */
+.search-icon {
+    position: absolute;
+    top: 50%; /* Centrado vertical */
+    left: 15px; /* Posición izquierda dentro del input */
+    transform: translateY(-50%);
+    color: #d8d8d8;
+    font-size: 1rem;
+    pointer-events: none; /* No bloquea clics dentro del input */
+}
+.navbar-toggler {
+  border: none;
+}
+
+.navbar-toggler-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg"><path stroke="rgba(255,255,255,1)" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"/></svg>');
+}
+
+.collapse.show {
+  display: block !important;
 }

@@ -33,6 +33,7 @@ function Perfil() {
 
   return (
     <div className="container mt-5">
+      <br />
       <h1 className="text-center mb-4">Perfil de Usuario</h1>
       {loading && <p className="text-center">Cargando...</p>}
       {error && <p className="text-center text-danger">{error}</p>}
@@ -42,7 +43,7 @@ function Perfil() {
             <div className="row">
               <div className="col-md-4 text-center">
               <img
-                  src={userProfile.photo || 'default-photo-url.jpg'}
+                  src={userProfile.photo || 'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg'}
                   alt="Profile"
                   className="rounded-circle img-fluid mb-3"
                   style={{ width: '150px', height: '150px', objectFit: 'cover' }}

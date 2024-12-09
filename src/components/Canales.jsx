@@ -109,22 +109,27 @@ export const Canales = () => {
       )}
       <br />
       <h2>Lista de Canales</h2>
-      <div className="channel-list">
-        {filteredChannels.slice(0, visibleChannels).map((channel, index) => (
-          <div
-            key={index}
-            onClick={() => handleChannelChange(channel)}
-            className={`channel-card ${currentChannel === channel ? 'active' : ''}`}
-          >
-            <img
-              src={channel.image}
-              alt={channel.name}
-              className="channel-image"
-            />
-            <p>{channel.name}</p>
-          </div>
-        ))}
-      </div>
+      <br />
+      {filteredChannels.length === 0 ? (
+        <h3>No se encuentra ese canal busca de nuevo porfavor</h3>
+      ) : (
+        <div className="channel-list">
+          {filteredChannels.slice(0, visibleChannels).map((channel, index) => (
+            <div
+              key={index}
+              onClick={() => handleChannelChange(channel)}
+              className={`channel-card ${currentChannel === channel ? 'active' : ''}`}
+            >
+              <img
+                src={channel.image}
+                alt={channel.name}
+                className="channel-image"
+              />
+              <p>{channel.name}</p>
+            </div>
+          ))}
+        </div>
+      )}  
 
       {visibleChannels < filteredChannels.length && (
         <center>

@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { FaSearch } from "react-icons/fa";
+import '../styles/Navbar.css';
 
 const Navbar = ({ onSearch }) => {
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState("/");
 
     const handleToggle = () => {
         setIsNavOpen(!isNavOpen);
@@ -85,7 +88,7 @@ const Navbar = ({ onSearch }) => {
                     </button>
 
                     {/* Logo y nombre */}
-                    <a className="navbar-brand d-flex align-items-center" href="/">
+                    <a className="navbar-brand d-flex align-items-center">
                         <img 
                             src="https://img.freepik.com/vector-premium/pictograma-tv-pantalla-television-icono-negro-redondo_53562-15456.jpg?w=740" 
                             height="30" 
@@ -100,23 +103,30 @@ const Navbar = ({ onSearch }) => {
                     <div className={`collapse navbar-collapse justify-content-center ${isNavOpen ? 'show' : ''}`} id="navbarNav">
                         <ul className="navbar-nav">
                             <li className="nav-item">
-                                <Link className="nav-link text-white" to="/">Tv en vivo</Link>
+                                <Link className={`nav-link text-white ${currentPage === "/" ? "active" : ""}`}
+                                    to="/" onClick={() => setCurrentPage("/")}>Tv en vivo
+                                </Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link text-white" to="/categoria">Categorias</Link>
+                                <Link className={`nav-link text-white ${currentPage === '/categoria' ? 'active' : ''}`}
+                                    to="/categoria" onClick={() => setCurrentPage('/categoria')}>Categorias
+                                </Link>
                             </li>
                             <li className="nav-item">
                                 {/* Campo de búsqueda */}
-                                <input
-                                    type="text"
-                                    placeholder="Buscar canales"
-                                    className="form-control"
-                                    onChange={(e) => onSearch(e.target.value)}
-                                />
+                                <div className="position-relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar canales"
+                                        className="form-control search-input"
+                                        onChange={(e) => onSearch(e.target.value)}
+                                    />
+                                    <FaSearch className="search-icon" />
+                                </div>
                             </li>
                         </ul>
                     </div>
-
+                    
                     {/* Ícono de usuario, oculto cuando el menú está abierto */}
                     <div className={`dropdown ms-auto ${isNavOpen ? 'd-none' : 'd-lg-flex'}`}>
                         <a 
@@ -128,7 +138,7 @@ const Navbar = ({ onSearch }) => {
                         >
                             {userProfile ? (
                                 <img 
-                                    src={userProfile.photo || "https://via.placeholder.com/150"}
+                                    src={userProfile.photo || "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg"}
                                     alt="User Image" 
                                     width="30" 
                                     height="30" 
