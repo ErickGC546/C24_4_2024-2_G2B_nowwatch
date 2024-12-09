@@ -10,18 +10,18 @@ const ListaFavoritos = ({ jwtToken, onRemoveFavorite }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Obtener la lista de favoritos del backend
+        // Obtener la lista de favoritos del backend
         const favoritosResponse = await axios.get('http://localhost:8080/favoritos', {
           headers: {
             Authorization: `Bearer ${jwtToken}`,
           },
         });
 
-        // 2. Obtener la lista completa de canales desde fetchChannels
+        // Obtener la lista completa de canales desde fetchChannels
         const canalesData = await fetchChannels();
         const canales = parseM3U(canalesData);
 
-        // 3. Combinar los datos de favoritos con los datos de canales
+        // Combinar los datos de favoritos con los datos de canales
         const favoritosConDetalles = favoritosResponse.data.map((favorito) => {
           const canalDetalles = canales.find(
             (canal) => canal.url === favorito.url // Coincidencia por URL
@@ -93,7 +93,7 @@ const ListaFavoritos = ({ jwtToken, onRemoveFavorite }) => {
   return (
     <div className="channel-list">
       {favoritos.length === 0 ? (
-        <p>No tienes canales favoritos aún.</p>
+        <p>No tienes canales favoritos aún</p>
       ) : (
         favoritos.map((favorite) => (
           <div key={favorite.id} className="channel-card">

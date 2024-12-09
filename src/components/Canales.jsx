@@ -126,28 +126,33 @@ export const Canales = () => {
           />
         </div>
       ) : (
-        <p>No hay un canal seleccionado o el canal actual no tiene una URL válida.</p>
-      )}
+        <p>No hay un canal seleccionado</p>
+      )
+      }
       <br />
       <h2>Lista de Canales</h2>
       <div className="channel-list">
-        {filteredChannels.slice(0, visibleChannels).map((channel, index) => (
-          <div
-            key={index}
-            onClick={() => handleChannelChange(channel)}
-            className={`channel-card ${currentChannel === channel ? 'active' : ''}`}
-          >
-            <img
-              src={channel.image}
-              
-              className="channel-image"
-            />
-            <p>{channel.name}</p>
-            <button onClick={() => agregarAFavoritos(channel.url)}>
-              Agregar a favoritos
-            </button>
-          </div>
-        ))}
+        {filteredChannels.length > 0 ? (
+          filteredChannels.slice(0, visibleChannels).map((channel, index) => (
+            <div
+              key={index}
+              onClick={() => handleChannelChange(channel)}
+              className={`channel-card ${currentChannel === channel ? 'active' : ''}`}
+            >
+              <img
+                src={channel.image}
+                alt={`Imagen del canal ${channel.name}`}
+                className="channel-image"
+              />
+              <p>{channel.name}</p>
+              <button onClick={() => agregarAFavoritos(channel.url)}>
+                Agregar a favoritos
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No se encuentra ninguna canal de TV que coincida con la búsqueda</p>
+        )}
       </div>
 
       {visibleChannels < filteredChannels.length && (

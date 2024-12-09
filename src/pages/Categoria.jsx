@@ -120,7 +120,7 @@ export const Categorias = () => {
     <>
       {/* Pasar handleSearch al Navbar */}
       <Navbar onSearch={handleSearch} />
-
+  
       <div className="categorias-container">
         <div className="categorias-video-container">
           {currentChannel ? (
@@ -139,38 +139,46 @@ export const Categorias = () => {
           )}
         </div>
         <div className="categorias-list-container">
-          {filteredCategories.map((category) => (
-            <div key={category} className="categorias-category-section">
-              <h2 className="categorias-category-title">{category}</h2>
-              <div className="categorias-channel-list">
-                {categories[category].slice(0, visibleChannels[category]).map((channel, index) => (
-                  <div
-                    key={index}
-                    className={`categorias-channel-card ${
-                      currentChannel && currentChannel.url === channel.url ? 'categorias-active-channel' : ''
-                    }`}
-                    onClick={() => handleChannelChange(channel)}
-                  >
-                    <img
-                      src={channel.image}
-                      alt={channel.name}
-                      className="categorias-channel-image"
-                    />
-                    <p className="categorias-channel-name">{channel.name}</p>
-                  </div>
-                ))}
+          {filteredCategories.length > 0 ? (
+            filteredCategories.map((category) => (
+              <div key={category} className="categorias-category-section">
+                <h2 className="categorias-category-title">{category}</h2>
+                <div className="categorias-channel-list">
+                  {categories[category].length > 0 ? (
+                    categories[category].slice(0, visibleChannels[category]).map((channel, index) => (
+                      <div
+                        key={index}
+                        className={`categorias-channel-card ${
+                          currentChannel && currentChannel.url === channel.url ? 'categorias-active-channel' : ''
+                        }`}
+                        onClick={() => handleChannelChange(channel)}
+                      >
+                        <img
+                          src={channel.image}
+                          alt={channel.name}
+                          className="categorias-channel-image"
+                        />
+                        <p className="categorias-channel-name">{channel.name}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay canales disponibles en esta categoría</p>
+                  )}
+                </div>
+                {visibleChannels[category] < categories[category].length && (
+                  <button onClick={() => loadMoreChannels(category)} className="boton-elegante">
+                    Ver más canales
+                  </button>
+                )}
               </div>
-              {visibleChannels[category] < categories[category].length && (
-                <button onClick={() => loadMoreChannels(category)} className="boton-elegante">
-                  Ver más canales
-                </button>
-              )}
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No se encuentra ninguna categoría que coincida con la búsqueda</p>
+          )}
         </div>
       </div>
     </>
-  );
+  );  
 };
 
 export default Categorias;
