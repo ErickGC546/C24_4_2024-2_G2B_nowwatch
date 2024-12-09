@@ -139,7 +139,6 @@ export const Canales = () => {
           >
             <img
               src={channel.image}
-              alt={channel.name}
               
               className="channel-image"
             />
