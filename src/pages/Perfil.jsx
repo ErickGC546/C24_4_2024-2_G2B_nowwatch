@@ -40,6 +40,7 @@ function Perfil() {
 
   return (
     <div className="container mt-5">
+      <br />
       <h1 className="text-center mb-4">Perfil de Usuario</h1>
       {loading && <p className="text-center">Cargando...</p>}
       {error && <p className="text-center text-danger">{error}</p>}
@@ -50,6 +51,7 @@ function Perfil() {
               <div className="col-md-4 text-center">
                 <img
                   src={userProfile.photo || 'https://via.placeholder.com/150'}
+
                   alt="Profile"
                   className="img-fluid rounded-circle"
                 />
