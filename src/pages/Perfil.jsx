@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import ListaFavoritos from '../components/ListaFavoritos'; // Importamos el componente
 
 function Perfil() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [jwtToken, setJwtToken] = useState(localStorage.getItem('jwtToken')); // Obtener token de localStorage
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('jwtToken');
-      if (!token) {
+      if (!jwtToken) {
         setError('No se encontró el token de autenticación');
         setLoading(false);
         return;
@@ -17,7 +18,7 @@ function Perfil() {
 
       try {
         const res = await axios.get('http://localhost:8080/profile/user', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${jwtToken}` },
         });
 
         setUserProfile(res.data);
@@ -29,7 +30,13 @@ function Perfil() {
     };
 
     fetchProfile();
-  }, []);
+  }, [jwtToken]);
+
+  // Eliminar un favorito de la lista en el perfil
+  const handleRemoveFavorite = (favoriteId) => {
+    // Aquí podrías realizar una actualización de UI si es necesario
+    console.log(`Eliminado favorito con ID: ${favoriteId}`);
+  };
 
   return (
     <div className="container mt-5">
@@ -41,27 +48,23 @@ function Perfil() {
           <div className="card-body">
             <div className="row">
               <div className="col-md-4 text-center">
-              <img
-                  src={userProfile.photo || 'default-photo-url.jpg'}
+                <img
+                  src={userProfile.photo || 'https://via.placeholder.com/150'}
                   alt="Profile"
-                  className="rounded-circle img-fluid mb-3"
-                  style={{ width: '150px', height: '150px', objectFit: 'cover' }}
+                  className="img-fluid rounded-circle"
                 />
-                <h3>{userProfile.first_name} {userProfile.last_name}</h3>
               </div>
               <div className="col-md-8">
-                <h4>Información de Contacto</h4>
-                <ul className="list-unstyled">
-                  <li><strong>Email:</strong> {userProfile.email}</li>
-                  <li><strong>Teléfono:</strong> {userProfile.phone || 'No disponible'}</li>
-                  <li><strong>Dirección:</strong> {userProfile.address || 'No disponible'}</li>
-                </ul>
-                <button className="btn btn-primary mt-4">Editar Perfil</button>
+                <h3>{userProfile.first_name} {userProfile.last_name}</h3>
+                <p>{userProfile.email}</p>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <h2 className="mt-4">Favoritos</h2>
+      <ListaFavoritos jwtToken={jwtToken} onRemoveFavorite={handleRemoveFavorite} />
     </div>
   );
 }

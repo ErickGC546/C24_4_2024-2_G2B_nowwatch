@@ -3,11 +3,13 @@ import Hls from 'hls.js';
 import { fetchChannels } from '../services/channelService';
 import Navbar from './Navbar';
 import '../styles/Canales.css';
+import axios from 'axios';
 
 export const Canales = () => {
   const [channels, setChannels] = useState([]);
   const [filteredChannels, setFilteredChannels] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
+  const [favoriteChannels, setFavoriteChannels] = useState([]);
   const [visibleChannels, setVisibleChannels] = useState(5);
   const videoRef = useRef(null);
 
@@ -88,6 +90,25 @@ export const Canales = () => {
     setVisibleChannels((prevVisibleChannels) => prevVisibleChannels + 5);
   };
 
+  const agregarAFavoritos = async (url) => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      alert('Por favor, inicia sesión para agregar a favoritos');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8080/favoritos', 
+        { url },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(response.data); // Mensaje de éxito o error
+    } catch (error) {
+      console.error('Error al agregar a favoritos:', error);
+      alert('Hubo un error al agregar el canal a favoritos');
+    }
+  };
+
   return (
     <div className="container">
       {/* Pasar la función handleSearch al Navbar */}
@@ -119,9 +140,13 @@ export const Canales = () => {
             <img
               src={channel.image}
               alt={channel.name}
+              
               className="channel-image"
             />
             <p>{channel.name}</p>
+            <button onClick={() => agregarAFavoritos(channel.url)}>
+              Agregar a favoritos
+            </button>
           </div>
         ))}
       </div>
