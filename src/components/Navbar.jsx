@@ -117,7 +117,7 @@ const Navbar = ({ onSearch }) => {
                                 <div className="position-relative">
                                     <input
                                         type="text"
-                                        placeholder="Buscar canales y categorias"
+                                        placeholder="Buscar canales"
                                         className="form-control search-input"
                                         onChange={(e) => onSearch(e.target.value)}
                                     />

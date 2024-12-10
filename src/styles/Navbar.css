@@ -1,7 +1,3 @@
-.nav-link {
-    position: relative; /* Necesario para el subrayado */
-    font-weight: normal; /* Peso normal por defecto */
-}
 /* Negrita en estado activo o hover */
 .nav-link.active,
 .nav-link:hover {
