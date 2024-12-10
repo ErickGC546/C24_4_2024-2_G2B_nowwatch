@@ -158,7 +158,7 @@ export const Categorias = () => {
                           alt={channel.name}
                           className="categorias-channel-image"
                         />
-                        <p className="categorias-channel-name">{channel.name}</p>
+                        <p className="categorias-channel-name">{channel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</p>
                       </div>
                     ))
                   ) : (

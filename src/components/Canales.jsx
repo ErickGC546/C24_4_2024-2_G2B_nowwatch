@@ -145,7 +145,7 @@ export const Canales = () => {
                 alt={`Imagen del canal ${channel.name}`}
                 className="channel-image"
               />
-              <p>{channel.name}</p>
+              <p>{channel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</p>
               <div className="btn-container">
                 <button className="btn-favoritos" onClick={(e) => { e.stopPropagation(); agregarAFavoritos(channel.url)}}>
                   <FaStar className="icono-favorito" />
