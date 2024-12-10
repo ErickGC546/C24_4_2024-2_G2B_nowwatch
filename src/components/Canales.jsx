@@ -4,6 +4,7 @@ import { fetchChannels } from '../services/channelService';
 import Navbar from './Navbar';
 import '../styles/Canales.css';
 import axios from 'axios';
+import { FaStar } from "react-icons/fa";
 
 export const Canales = () => {
   const [channels, setChannels] = useState([]);
@@ -145,9 +146,12 @@ export const Canales = () => {
                 className="channel-image"
               />
               <p>{channel.name}</p>
-              <button onClick={() => agregarAFavoritos(channel.url)}>
-                Agregar a favoritos
-              </button>
+              <div className="btn-container">
+                <button className="btn-favoritos" onClick={(e) => { e.stopPropagation(); agregarAFavoritos(channel.url)}}>
+                  <FaStar className="icono-favorito" />
+                  Añadir a favoritos
+                </button>
+              </div>
             </div>
           ))
         ) : (
