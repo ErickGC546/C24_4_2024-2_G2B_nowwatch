@@ -125,7 +125,7 @@ export const Categorias = () => {
         <div className="categorias-video-container">
           {currentChannel ? (
             <>
-              <h2 className="categorias-current-title">Canal: {currentChannel.name}</h2>
+              <h2 className="categorias-current-title">Canal: {currentChannel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</h2>
               <video
                 ref={videoRef}
                 controls

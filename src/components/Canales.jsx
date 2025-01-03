@@ -117,7 +117,7 @@ export const Canales = () => {
 
       {currentChannel && currentChannel.url ? (
         <div className="video-container">
-          <h2>Canal: {currentChannel.name}</h2>
+          <h2>Canal: {currentChannel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</h2>
           <video
             ref={videoRef}
             controls
