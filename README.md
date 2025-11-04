@@ -1,148 +1,66 @@
-# CoFi — Administración Financiera Colaborativa para Estudiantes (TECSUP)
+# noWatch - Aplicación de IPTV (En Desarrollo) - **Descripción General**
 
-Estado: En desarrollo
+La aplicación de **IPTV** llamada **noWatch** está en desarrollo y tiene como objetivo ofrecer una experiencia de entretenimiento completa, permitiendo a los usuarios acceder a una amplia variedad de canales de televisión en vivo, películas y programas de televisión directamente desde sus dispositivos. Nuestra aplicación se basa en la integración con fuentes de contenido abiertas y actualizadas para proporcionar una experiencia fluida y organizada.
 
-Descripción general
--------------------
-CoFi es una aplicación web (con extensión móvil prevista) diseñada para facilitar la administración financiera colaborativa entre estudiantes del Instituto de Educación Superior Tecnológico TECSUP. La plataforma ayuda a registrar ingresos y egresos, coordinar presupuestos compartidos entre equipos de trabajo o compañeros de vivienda, generar reportes en tiempo real y ofrecer recomendaciones personalizadas mediante IA. Además contempla funcionalidades experimentales como registro de operaciones por voz.
+## 1. **Integración con el Repositorio [iptv-org/iptv](https://github.com/iptv-org/iptv)**
+   
+La aplicación consume los datos del repositorio de IPTV de código abierto [iptv-org/iptv](https://github.com/iptv-org/iptv), que contiene listas de reproducción organizadas de IPTV, ofreciendo acceso a canales de TV en vivo, películas, y más. Este repositorio cuenta con miles de canales globales organizados por regiones, géneros y otros criterios, lo que permite a los usuarios explorar contenido de manera eficiente.
 
-Problema que resuelve
----------------------
-Muchos estudiantes enfrentan dificultades para llevar un control de gastos compartidos (proyectos, movilidad, alimentación, materiales) y para planificar su economía durante la etapa académica. CoFi busca:
-- Mejorar la visibilidad de los flujos de dinero individuales y grupales.
-- Facilitar la coordinación financiera en actividades y proyectos.
-- Fomentar hábitos responsables de ahorro y planificación.
+- **Acceso a canales de todo el mundo:** Los usuarios pueden disfrutar de una amplia gama de canales de televisión desde diferentes países y en múltiples idiomas.
+- **Actualización continua del contenido:** La app aprovecha las actualizaciones frecuentes del repositorio, garantizando que los usuarios tengan acceso a la programación más actualizada y con la mayor calidad disponible.
 
-Características principales
----------------------------
-- Registro de transacciones: ingresos y egresos, con categorización y etiquetas.
-- Cuentas y fondos compartidos: crear presupuestos grupales y dividir gastos.
-- Presupuestos y alertas: notificaciones cuando se acercan o se exceden límites.
-- Reportes e indicadores: dashboards con gastos por categoría, tendencia mensual y balances.
-- Recomendaciones por IA: sugerencias de ahorro y optimización con base en patrones de gasto.
-- Comandos de voz (experimental): registrar transacciones usando voz (Web Speech API u otra integración).
-- Roles y permisos: control de acceso para miembros de un presupuesto compartido.
-- Panel web: desarrollado con Next.js; API y acceso a datos gestionados con Prisma.
+## 2. **Funcionalidades Clave**
+   
+Nuestra aplicación está siendo diseñada con el objetivo de proporcionar una experiencia intuitiva y organizada para los usuarios. A continuación se detallan las principales características:
 
-Cómo funciona (visión general)
-------------------------------
-1. Usuarios crean una cuenta y pueden iniciar o unirse a “espacios” (grupos/proyectos) para compartir presupuestos.
-2. Cada miembro registra ingresos y gastos, asignando categorías y miembros responsables.
-3. La app consolida los movimientos para mostrar balances individuales y del grupo, generar reportes y emitir alertas.
-4. Un módulo de IA (con servicio externo) analiza los patrones de gasto y propone recomendaciones personalizadas.
-5. Opcionalmente, los usuarios pueden dictar transacciones por voz para un registro rápido.
+- **Exploración de contenido por categorías:** La aplicación organiza los canales de IPTV y el listado de películas en distintas categorías para facilitar su búsqueda. Estas categorías incluyen:
+  - **Países:** Organización por región y país de origen del canal o contenido.
+  - **Géneros:** Desde deportes, noticias, entretenimiento, hasta géneros específicos como cine, infantil, música y mucho más.
+  - **Idioma:** Agrupación de contenido por el idioma del canal o película.
+  - **Tipos de contenido:** Diferenciación entre **Televisión en vivo** y **Películas a demanda**.
+  
+- **Listado de Películas:** Gracias a la integración con el repositorio de IPTV, la aplicación ofrecerá un extenso listado de películas organizadas por género y región. Los usuarios podrán navegar y reproducir películas directamente desde la aplicación sin complicaciones.
 
-Arquitectura y tecnologías
---------------------------
-- Frontend: Next.js + React + TypeScript
-- Backend / ORM: Node.js + Prisma (compatible con PostgreSQL en producción; SQLite para desarrollo)
-- Autenticación: (por definir; sugerencias: NextAuth o JWT)
-- IA / Recomendaciones: integración con APIs de modelos (ej. OpenAI u otro proveedor)
-- Voz: Web Speech API o servicios externos de reconocimiento
-- Despliegue sugerido: Vercel (frontend), proveedor gestionado de PostgreSQL para producción
+- **Búsqueda personalizada:** Los usuarios podrán realizar búsquedas basadas en el nombre del canal, película o por palabra clave, facilitando el acceso directo al contenido deseado.
 
-Estructura del repositorio (resumen)
-------------------------------------
-- /prisma — esquema y migraciones de la base de datos
-- /public — recursos estáticos (imágenes, logos, etc.)
-- /src — código fuente (frontend y/o API)
-- README.md, next.config.ts, package.json, tsconfig.json — configuración general
+- **Favoritos y listas personalizadas:** Cada usuario podrá guardar sus canales y películas favoritos para acceder a ellos de manera rápida y sencilla desde su cuenta.
 
-Requisitos previos
-------------------
-- Node.js >= 18
-- npm, yarn o pnpm
-- Base de datos para producción (Postgres recomendado)
-- Claves/secretos para servicios externos (OPENAI_API_KEY, etc.)
+## 3. **Características Técnicas**
 
-Instalación y ejecución (desarrollo)
------------------------------------
-1. Clona el repositorio:
-   git clone https://github.com/ErickGC546/C24_6_2025-2_G15_CoFi_B.git
-2. Entra al directorio:
-   cd C24_6_2025-2_G15_CoFi_B
-3. Instala dependencias:
-   npm install
-   # o
-   yarn
-   # o
-   pnpm install
-4. Copia y edita variables de entorno:
-   cp .env.example .env
-   - DATABASE_URL="postgresql://user:password@localhost:5432/cofi"
-   - NEXT_PUBLIC_API_URL="http://localhost:3000/api"
-   - NEXTAUTH_URL="http://localhost:3000"
-   - OPENAI_API_KEY="tu_api_key_si_aplica"
-5. Ejecuta migraciones de Prisma (si aplica):
-   npx prisma migrate dev --name init
-6. Inicia el servidor de desarrollo:
-   npm run dev
-7. Abre http://localhost:3000
+La aplicación está siendo construida con tecnologías modernas que garantizan un rendimiento eficiente, una integración fluida de API y la capacidad de manejar grandes volúmenes de datos en tiempo real.
 
-Comandos útiles
----------------
-- npm run dev — iniciar entorno de desarrollo
-- npm run build — compilar para producción
-- npm run start — ejecutar versión de producción
-- npx prisma migrate dev — aplicar migraciones
-- npx prisma studio — explorar la base de datos mediante GUI
+- **Consumo de API del repositorio de IPTV:** Utilizamos llamadas API eficientes para consumir los datos actualizados del repositorio de [iptv-org/iptv](https://github.com/iptv-org/iptv), permitiendo que la aplicación siempre muestre el contenido más reciente.
+- **Soporte para listas de reproducción M3U:** El formato M3U es soportado para reproducir canales de TV y películas, permitiendo a los usuarios acceder a su contenido con facilidad desde cualquier dispositivo compatible.
+- **Compatibilidad** La aplicación está desarrollada para ser compatible en web y en movil, permitiendo que los usuarios disfruten de su contenido desde sus dispositivos móviles o computador con internet.
+- **Streaming optimizado:** La aplicación asegura una transmisión de video fluida mediante una gestión optimizada del ancho de banda y la capacidad de ajustar la calidad de transmisión según la conexión del usuario.
 
-Despliegue
-----------
-- Recomendado: Vercel para el frontend Next.js.
-- Configura las variables de entorno (DATABASE_URL, OPENAI_API_KEY, NEXTAUTH_URL, etc.) en la plataforma de despliegue.
-- Usa un servicio gestionado de PostgreSQL en producción y asegura backups.
+## 4. **Cómo Funciona la Aplicación**
 
-Buenas prácticas y seguridad
-----------------------------
-- No subir archivos .env ni credenciales al repositorio.
-- Validar y sanitizar todas las entradas en el backend.
-- Implementar autenticación y autorización robusta para datos compartidos.
-- Revisar vulnerabilidades en dependencias (npm audit) y mantener actualizaciones periódicas.
-- Solicitar y registrar consentimientos al usar funcionalidades de voz o análisis con IA.
+1. **Conexión con el repositorio de IPTV:** La aplicación se conecta automáticamente al repositorio de IPTV y extrae el listado de canales de TV y películas. Este contenido se actualiza periódicamente, proporcionando a los usuarios acceso al contenido más reciente.
+   
+2. **Organización del contenido:** Una vez que los datos se extraen del repositorio, se organizan en diferentes categorías predefinidas, tales como país, género, y tipo de contenido. Esto permite a los usuarios navegar de forma intuitiva por los canales y las películas.
+   
+3. **Reproducción de contenido:** Los usuarios seleccionan un canal o película desde la interfaz de la aplicación y se inicia la reproducción utilizando un reproductor de video integrado. La transmisión es directa desde la fuente, asegurando una reproducción sin interrupciones.
 
-Trabajo en equipo y responsabilidades (sugerencia)
---------------------------------------------------
-- Frontend: interfaces, componentes, accesibilidad y PWA si aplica.
-- Backend: modelos, controladores, autenticación y lógica de negocios.
-- Data/DB: diseño de esquema (Prisma), migraciones y seeds.
-- IA: integración de APIs y validación de recomendaciones.
-- QA: pruebas funcionales y revisión de seguridad.
+## 5. **Trabajo en Equipo**
 
-Cómo contribuir
----------------
-1. Abre un issue describiendo bug o feature.
-2. Crea una rama con prefijo feature/ o fix/.
-3. Añade tests y documentación.
-4. Abre un Pull Request describiendo:
-   - Qué problema resuelve
-   - Cómo probarlo localmente
-   - Notas importantes para el revisor
+Este proyecto es un esfuerzo colaborativo, en el que trabajamos en equipo para desarrollar la aplicación:
 
-Roadmap / mejoras previstas
----------------------------
-- Versión móvil (React Native / Expo) o PWA mejorada.
-- Recomendaciones más avanzadas con embeddings y métricas personalizadas.
-- Exportación/backup de datos (CSV / PDF).
-- Integración opcional con pasarelas de pago y conciliación automática.
-- Mecanismo de auditoría y logs para transacciones compartidas.
+- **Frontend (Interfaz de Usuario):** Desarrollado con **React** para proporcionar una experiencia moderna y fluida en plataformas web y móviles.
+- **Backend (Autenticación y Servicios):** Desarrollado en **Spring Boot**, responsable de la gestión segura de usuarios y la comunicación eficiente entre el frontend y los servicios de contenido.
 
-Licencia
---------
-- Añade un archivo LICENSE (por ejemplo MIT) si quieres permitir uso y contribuciones públicas.
+**Colaboradores:**
+- Alex Huancahuari [Alex/project_SpringBoot](https://github.com/livecodingx/PI_2_2024_4C24_noWatch) (Backend del todo el proyecto).
+- Rodrigo Contreras [Rodrigo/project_Kotlin](https://github.com/Aley-r-t/Integrador.git) (Frontend en Movil).
 
-Contacto
---------
-- Autor / Mantenedor: ErickGC546  
-- Sitio (despliegue): https://co-fi-web.vercel.app  
-- Repositorio: https://github.com/ErickGC546/C24_6_2025-2_G15_CoFi_B
+## 6. **Perspectivas Futuras**
 
-Referencias visuales
---------------------
-- Captura de la estructura del repositorio y panel (referencia: imagen 1).
+En futuras versiones, planeamos incluir las siguientes mejoras:
+   
+- **Soporte para grabación de TV en vivo:** Permitiendo a los usuarios grabar y almacenar programas o películas.
+- **Notificaciones personalizadas:** Alertas para eventos en vivo o estrenos de películas basadas en las preferencias del usuario.
+- **Interfaz mejorada con recomendaciones personalizadas:** Basado en el historial de visualización del usuario.
 
-¿Quieres que haga ahora alguno de estos cambios directamente en tu repositorio?
-- Puedo generar y añadir un archivo .env.example.
-- Puedo añadir badges (build, deploy, license) al inicio del README.
-- Puedo crear plantillas en .github/ISSUE_TEMPLATE y .github/PULL_REQUEST_TEMPLATE.
-Indica cuál prefieres y lo agrego al README o creo los archivos necesarios.
+## 7. **Conclusión**
+
+Nuestra aplicación IPTV **noWatch** no solo aprovechará la vasta base de datos de contenido disponible en el repositorio [iptv-org/iptv](https://github.com/iptv-org/iptv), sino que también ofrecerá una interfaz optimizada y amigable para el usuario. Con características avanzadas como la búsqueda por categorías, la integración de listas de reproducción M3U, y la capacidad de reproducir contenido en alta calidad desde cualquier dispositivo, esta aplicación representa una solución completa para los entusiastas del streaming de IPTV.
