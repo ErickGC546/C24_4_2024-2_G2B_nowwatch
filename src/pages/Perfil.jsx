@@ -1,72 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import ListaFavoritos from '../components/ListaFavoritos'; // Importamos el componente
+import { useNavigate } from 'react-router-dom';
+import { listenToAuthChanges } from '../firebase';
+import ListaFavoritos from '../components/ListaFavoritos';
+import '../styles/Perfil.css';
 
 function Perfil() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [jwtToken, setJwtToken] = useState(localStorage.getItem('jwtToken')); // Obtener token de localStorage
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!jwtToken) {
-        setError('No se encontró el token de autenticación');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await axios.get('http://localhost:8080/profile/user', {
-          headers: { Authorization: `Bearer ${jwtToken}` },
+    const unsubscribe = listenToAuthChanges((user) => {
+      if (user) {
+        setUserProfile({
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
         });
-
-        setUserProfile(res.data);
-        setLoading(false);
-      } catch (error) {
-        setError('No se pudo obtener el perfil');
-        setLoading(false);
+        setError(null);
+      } else {
+        setUserProfile(null);
+        setError('Inicia sesión con Google para ver tu perfil');
       }
-    };
+      setLoading(false);
+    });
 
-    fetchProfile();
-  }, [jwtToken]);
+    return () => unsubscribe();
+  }, []);
 
-  // Eliminar un favorito de la lista en el perfil
-  const handleRemoveFavorite = (favoriteId) => {
-    // Aquí podrías realizar una actualización de UI si es necesario
-    console.log(`Eliminado favorito con ID: ${favoriteId}`);
-  };
+  useEffect(() => {
+    if (!loading && !userProfile) {
+      navigate('/');
+    }
+  }, [loading, userProfile, navigate]);
 
   return (
-    <div className="container mt-5">
-      <br />
-      <h1 className="text-center mb-4">Perfil de Usuario</h1>
-      {loading && <p className="text-center">Cargando...</p>}
-      {error && <p className="text-center text-danger">{error}</p>}
+    <div className="perfil-container">
+      <h1 className="perfil-title">Perfil de <span>Usuario</span></h1>
+      {loading && <p className="perfil-loading">Cargando...</p>}
+      {error && <p className="perfil-error">{error}</p>}
       {userProfile && (
-        <div className="card shadow-sm">
-          <div className="card-body">
-            <div className="row">
-              <div className="col-md-4 text-center">
-                <img
-                  src={userProfile.photo || 'https://via.placeholder.com/150'}
-
-                  alt="Profile"
-                  className="img-fluid rounded-circle"
-                />
-              </div>
-              <div className="col-md-8">
-                <h3>{userProfile.first_name} {userProfile.last_name}</h3>
-                <p>{userProfile.email}</p>
-              </div>
+        <div className="perfil-card">
+          <div className="perfil-content">
+            <div className="perfil-avatar-wrapper">
+              <img
+                src={userProfile.photoURL || 'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg'}
+                alt="Profile"
+                referrerPolicy="no-referrer"
+                onError={(e) => { e.currentTarget.src = 'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg'; }}
+                className="perfil-avatar"
+              />
+            </div>
+            <div className="perfil-info">
+              <h3>{userProfile.displayName}</h3>
+              <p>{userProfile.email}</p>
             </div>
           </div>
         </div>
       )}
 
-      <h2 className="mt-4">Favoritos</h2>
-      <ListaFavoritos jwtToken={jwtToken} onRemoveFavorite={handleRemoveFavorite} />
+      <h2 className="perfil-section-title"><span>Canales Favoritos</span></h2>
+      <ListaFavoritos />
     </div>
   );
 }

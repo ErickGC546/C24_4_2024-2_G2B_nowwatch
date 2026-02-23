@@ -1,179 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
-import { FaSearch } from "react-icons/fa";
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { listenToAuthChanges, signInWithGoogle, logout } from '../firebase';
 import '../styles/Navbar.css';
 
-const Navbar = ({ onSearch }) => {
+const Navbar = () => {
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const [currentPage, setCurrentPage] = useState("/");
+    const location = useLocation();
 
     const handleToggle = () => {
         setIsNavOpen(!isNavOpen);
     };
 
+    const FALLBACK_AVATAR = 'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg';
+
     useEffect(() => {
-        const fetchProfile = async () => {
-            const token = localStorage.getItem('jwtToken');
-            if (!token) {
-                setUserProfile(null);
-                return;
-            }
-
-            try {
-                const res = await axios.get('http://localhost:8080/profile/user', {
-                    headers: { Authorization: `Bearer ${token}` },
+        const unsubscribe = listenToAuthChanges((user) => {
+            if (user) {
+                setUserProfile({
+                    displayName: user.displayName,
+                    email: user.email,
+                    photo: user.photoURL,
                 });
-                setUserProfile(res.data);
-            } catch (error) {
-                setError('No se pudo obtener el perfil');
+            } else {
+                setUserProfile(null);
             }
-        };
+        });
 
-        fetchProfile();
+        return () => unsubscribe();
     }, []);
 
-    const handleLoginSuccess = async (credentialResponse) => {
-        const { credential } = credentialResponse;
+    const handleLogin = async () => {
         try {
-            const response = await axios.post('http://localhost:8080/auth/callback/google', {
-                idToken: credential,
-            });
-
-            if (response.data.message === 'Authentication successful') {
-                const jwtToken = response.data.token;
-                
-                console.log('JWT recibido:', jwtToken);
-                localStorage.setItem('jwtToken', jwtToken);
-
-                navigate('/perfil');
-            }
-        } catch (error) {
-            console.error('Error durante la autenticación de Google:', error);
+            await signInWithGoogle();
+            navigate('/perfil');
+        } catch (err) {
+            console.error('Error durante la autenticación de Google:', err);
             setError('Error en la autenticación');
         }
     };
 
-    const handleLoginFailure = (error) => {
-        console.error('Login failed:', error);
-        setError('Error en la autenticación');
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('jwtToken');
-        setUserProfile(null);
-        navigate('/');
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/');
+        } catch (err) {
+            console.error('Error al cerrar sesión:', err);
+            setError('No se pudo cerrar sesión');
+        }
     };
 
     return (
         <>
-            <nav className="navbar navbar-expand-lg bg-dark border-bottom border-body fixed-top" data-bs-theme="dark">
-                <div className="container-fluid">
-                    {/* Botón de menú responsivo */}
-                    <button
-                        className="navbar-toggler me-3"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav"
-                        aria-controls="navbarNav"
-                        aria-expanded={isNavOpen ? "true" : "false"}
-                        aria-label="Toggle navigation"
-                        onClick={handleToggle}
-                    >
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-
-                    {/* Logo y nombre */}
-                    <a className="navbar-brand d-flex align-items-center">
+            <nav className="nw-navbar fixed-top">
+                <div className="nw-nav-shell">
+                    <div className="nw-brand" onClick={() => navigate('/')}> 
                         <img 
-                            src="https://img.freepik.com/vector-premium/pictograma-tv-pantalla-television-icono-negro-redondo_53562-15456.jpg?w=740" 
-                            height="30" 
-                            width="30" 
+                            src="https://i.ibb.co/fGD9PvcR/Logo.png" 
+                            height="40" 
+                            width="40" 
                             alt="Logo" 
                             className="me-2"
                         />
-                        <span className="text-white">noWatch</span>
-                    </a>
-
-                    {/* Menú colapsable */}
-                    <div className={`collapse navbar-collapse justify-content-center ${isNavOpen ? 'show' : ''}`} id="navbarNav">
-                        <ul className="navbar-nav">
-                            <li className="nav-item">
-                                <Link className={`nav-link text-white ${currentPage === "/" ? "active" : ""}`}
-                                    to="/" onClick={() => setCurrentPage("/")}>Tv en vivo
-                                </Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className={`nav-link text-white ${currentPage === '/categoria' ? 'active' : ''}`}
-                                    to="/categoria" onClick={() => setCurrentPage('/categoria')}>Categorias
-                                </Link>
-                            </li>
-                            <li className="nav-item">
-                                {/* Campo de búsqueda */}
-                                <div className="position-relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar"
-                                        className="form-control search-input"
-                                        onChange={(e) => onSearch(e.target.value)}
-                                    />
-                                    <FaSearch className="search-icon" />
-                                </div>
-                            </li>
-                        </ul>
+                        <div className="nw-brand-text">
+                            <span>NoWatch</span>
+                        </div>
                     </div>
-                    
-                    {/* Ícono de usuario, oculto cuando el menú está abierto */}
-                    <div className={`dropdown ms-auto ${isNavOpen ? 'd-none' : 'd-lg-flex'}`}>
-                        <a 
-                            href="#" 
-                            className="d-flex align-items-center" 
-                            id="dropdownMenuLink" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false"
+
+                    <button className="nw-burger" onClick={handleToggle} aria-label="Toggle navigation">
+                        <span />
+                        <span />
+                        <span />
+                    </button>
+
+                    <div className={`nw-links ${isNavOpen ? 'open' : ''}`}>
+                        <Link className={location.pathname === '/' ? 'active' : ''} to="/" onClick={() => setIsNavOpen(false)}>
+                            En vivo
+                        </Link>
+                        <Link className={location.pathname.startsWith('/categoria') ? 'active' : ''} to="/categoria" onClick={() => setIsNavOpen(false)}>
+                            Categorías
+                        </Link>
+                        {userProfile && (
+                          <Link className={location.pathname.startsWith('/perfil') ? 'active' : ''} to="/perfil" onClick={() => setIsNavOpen(false)}>
+                              Perfil
+                          </Link>
+                        )}
+                    </div>
+
+                    <div className="nw-user">
+                        <button
+                            type="button"
+                            className="nw-user-chip"
+                            aria-label={userProfile ? 'Cerrar sesión' : 'Iniciar sesión con Google'}
+                            onClick={userProfile ? handleLogout : handleLogin}
                         >
-                            {userProfile ? (
-                                <img 
-                                    src={userProfile.photo || "https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg"}
-                                    alt="User Image" 
-                                    width="30" 
-                                    height="30" 
-                                    className="rounded-circle"
-                                />
-                            ) : (
-                                <img 
-                                    src="https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small_2x/user-profile-icon-free-vector.jpg" 
-                                    alt="User Image" 
-                                    width="30" 
-                                    height="30" 
-                                    className="rounded-circle"
-                                />
-                            )}
-                        </a>
-                        <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
-                            {userProfile ? (
-                                <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li>
-                            ) : (
-                                <li>
-                                    <GoogleLogin
-                                        onSuccess={handleLoginSuccess}
-                                        onError={handleLoginFailure}
-                                        useOneTap
-                                    />
-                                </li>
-                            )}
-                            {userProfile && (
-                                <li>
-                                    <button className="dropdown-item" onClick={handleLogout}>
-                                        Cerrar sesión
-                                    </button>
-                                </li>
-                            )}
-                        </ul>
+                            <img 
+                                src={userProfile?.photo || FALLBACK_AVATAR}
+                                alt="Foto de perfil"
+                                referrerPolicy="no-referrer"
+                                onError={(e) => { e.currentTarget.src = FALLBACK_AVATAR; }}
+                            />
+                            <span>{userProfile ? 'Cerrar sesión' : 'Iniciar sesión'}</span>
+                        </button>
                     </div>
                 </div>
             </nav>

@@ -1,0 +1,143 @@
+#en-vivo {
+  scroll-margin-top: 100px;
+}
+
+.home-shell {
+  display: grid;
+  padding-bottom: 60px;
+}
+
+.home-hero {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 36px 36px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), rgba(255, 215, 0, 0.3));
+}
+
+.home-hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.home-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero h1 {
+  margin: 16px 0 12px;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.home-hero h1 span {
+  color: var(--accent);
+}
+
+.home-hero p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  max-width: 720px;
+  font-size: 1.05rem;
+}
+
+.home-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.home-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric {
+  padding: 18px 20px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  display: grid;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.metric:hover {
+  border-color: var(--stroke-accent);
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.metric-value {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.home-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 0 0;
+  display: grid;
+  gap: 16px;
+}
+
+.home-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.home-section-head::after {
+  content: "";
+  flex: 1;
+  min-width: 100px;
+  height: 1px;
+  margin-left: 16px;
+  background: linear-gradient(90deg, var(--stroke-accent), transparent);
+}
+
+@media (max-width: 768px) {
+  .home-hero h1 {
+    font-size: 1.9rem;
+  }
+  
+  .home-hero {
+    padding: 32px 24px 28px;
+  }
+}

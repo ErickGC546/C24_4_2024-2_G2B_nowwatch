@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Hls from 'hls.js';
 import { fetchChannels } from '../services/channelService';
-import Navbar  from '../components/Navbar';
 import '../styles/Categoria.css';
+import { FaPlay, FaPause, FaVolumeUp, FaVolumeDown, FaExpand } from 'react-icons/fa';
 
 export const Categorias = () => {
   const [channels, setChannels] = useState([]);
@@ -10,7 +10,15 @@ export const Categorias = () => {
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [visibleChannels, setVisibleChannels] = useState({});
   const [currentChannel, setCurrentChannel] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(0.8);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const playerRef = useRef(null);
   const videoRef = useRef(null);
+  const hideControlsTimer = useRef(null);
 
   useEffect(() => {
     const loadChannels = async () => {
@@ -64,6 +72,58 @@ export const Categorias = () => {
     }
   }, [currentChannel]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = !!document.fullscreenElement;
+      setIsFullscreen(active);
+      setControlsVisible(true);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const handleTogglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  };
+
+  const handleFullscreen = () => {
+    const container = playerRef.current;
+    if (!container) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else if (container.requestFullscreen) {
+      container.requestFullscreen();
+    }
+  };
+
+  const showControlsTemporarily = () => {
+    if (!isFullscreen) return;
+    setControlsVisible(true);
+    if (hideControlsTimer.current) {
+      clearTimeout(hideControlsTimer.current);
+    }
+    hideControlsTimer.current = setTimeout(() => {
+      setControlsVisible(false);
+    }, 2000);
+  };
+
+  const handleVolumeChange = (nextVolume) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const clamped = Math.max(0, Math.min(1, nextVolume));
+    video.volume = clamped;
+    video.muted = clamped === 0;
+    setVolume(clamped);
+    setIsMuted(video.muted);
+  };
+
   const parseM3U = (data) => {
     const lines = data.split('\n');
     const channels = [];
@@ -107,35 +167,122 @@ export const Categorias = () => {
 
   const handleSearch = (term) => {
     if (term === '') {
-      setFilteredCategories(Object.keys(categories)); // Mostrar todas las categorías
+      setFilteredCategories(Object.keys(categories));
     } else {
       const filtered = Object.keys(categories).filter((category) =>
         category.toLowerCase().includes(term.toLowerCase())
       );
-      setFilteredCategories(filtered); // Actualizar categorías filtradas
+      setFilteredCategories(filtered);
     }
   };
 
   return (
     <>
-      {/* Pasar handleSearch al Navbar */}
-      <Navbar onSearch={handleSearch} />
-  
       <div className="categorias-container">
+        <div className="categorias-search">
+          <input
+            type="text"
+            placeholder="Buscar categoría..."
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); handleSearch(e.target.value); }}
+          />
+        </div>
         <div className="categorias-video-container">
           {currentChannel ? (
             <>
-              <h2 className="categorias-current-title">Canal: {currentChannel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</h2>
-              <video
-                ref={videoRef}
-                controls
-                autoPlay
-                className="categorias-video"
-                onError={() => alert('No se pudo reproducir este canal.')}
-              />
+              <div className="categorias-player-head">
+                <div>
+                  <p className="eyebrow">Transmitiendo ahora</p>
+                  <h2 className="categorias-channel-title">{currentChannel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</h2>
+                </div>
+                <div className="tag-strip">
+                  <span className="tag">HD</span>
+                  <span className="tag">Live</span>
+                </div>
+              </div>
+              <div
+                className="video-frame"
+                ref={playerRef}
+                onMouseMove={showControlsTemporarily}
+                onMouseLeave={() => isFullscreen && setControlsVisible(false)}
+                onClick={showControlsTemporarily}
+              >
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  className="categorias-video"
+                  controls={false}
+                  playsInline
+                  onError={() => alert('No se pudo reproducir este canal.')}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onLoadedMetadata={() => {
+                    const video = videoRef.current;
+                    if (!video) return;
+                    setIsMuted(!!video.muted);
+                    setVolume(video.volume ?? 0.8);
+                  }}
+                  onVolumeChange={() => {
+                    const video = videoRef.current;
+                    if (!video) return;
+                    setIsMuted(!!video.muted);
+                    setVolume(video.volume ?? 0.8);
+                  }}
+                />
+                <div
+                  className={`video-controls ${isFullscreen && !controlsVisible ? 'hidden' : ''}`}
+                  role="group"
+                  aria-label="Controles de reproduccion"
+                >
+                  <div className="video-control-group">
+                    <button
+                      type="button"
+                      className="video-btn"
+                      onClick={handleTogglePlay}
+                      aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
+                    >
+                      {isPlaying ? <FaPause /> : <FaPlay />}
+                    </button>
+                    <button
+                      type="button"
+                      className="video-btn"
+                      onClick={() => handleVolumeChange(volume - 0.1)}
+                      aria-label="Bajar volumen"
+                    >
+                      <FaVolumeDown />
+                    </button>
+                    <input
+                      className="video-slider"
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={volume}
+                      onChange={(event) => handleVolumeChange(parseFloat(event.target.value))}
+                      aria-label="Volumen"
+                    />
+                    <button
+                      type="button"
+                      className="video-btn"
+                      onClick={() => handleVolumeChange(volume + 0.1)}
+                      aria-label="Subir volumen"
+                    >
+                      <FaVolumeUp />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className="video-btn ghost"
+                    onClick={handleFullscreen}
+                    aria-label="Pantalla completa"
+                  >
+                    <FaExpand />
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
-            <p>No hay un canal seleccionado.</p>
+            <p className="perfil-loading">No hay un canal seleccionado.</p>
           )}
         </div>
         <div className="categorias-list-container">

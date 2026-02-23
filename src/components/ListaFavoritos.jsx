@@ -1,28 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { listenToAuthChanges } from '../firebase';
 import { fetchChannels } from '../services/channelService';
+import { fetchFavorites, removeFavorite } from '../services/favoritesService';
 
-const ListaFavoritos = ({ jwtToken, onRemoveFavorite }) => {
+const ListaFavoritos = () => {
   const [favoritos, setFavoritos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = listenToAuthChanges((user) => setCurrentUser(user));
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener la lista de favoritos del backend
-        const favoritosResponse = await axios.get('http://localhost:8080/favoritos', {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-        });
+        if (!currentUser) {
+          setFavoritos([]);
+          setLoading(false);
+          return;
+        }
 
         // Obtener la lista completa de canales desde fetchChannels
         const canalesData = await fetchChannels();
         const canales = parseM3U(canalesData);
 
+        const favoritosResponse = await fetchFavorites(currentUser.uid);
+
         // Combinar los datos de favoritos con los datos de canales
-        const favoritosConDetalles = favoritosResponse.data.map((favorito) => {
+        const favoritosConDetalles = favoritosResponse.map((favorito) => {
           const canalDetalles = canales.find(
             (canal) => canal.url === favorito.url // Coincidencia por URL
           );
@@ -44,10 +52,8 @@ const ListaFavoritos = ({ jwtToken, onRemoveFavorite }) => {
       }
     };
 
-    if (jwtToken) {
-      fetchData();
-    }
-  }, [jwtToken]);
+    fetchData();
+  }, [currentUser]);
 
   const parseM3U = (data) => {
     const lines = data.split('\n');
@@ -75,25 +81,23 @@ const ListaFavoritos = ({ jwtToken, onRemoveFavorite }) => {
   };
 
   const handleRemoveFavorite = async (favoriteId) => {
+    if (!currentUser) return;
+
     try {
-      await axios.delete(`http://localhost:8080/favoritos/${favoriteId}`, {
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      });
+      await removeFavorite(currentUser.uid, favoriteId);
       setFavoritos(favoritos.filter((fav) => fav.id !== favoriteId));
     } catch (error) {
       console.error('Error al eliminar favorito:', error);
     }
   };
 
-  if (loading) return <p>Cargando favoritos...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <p className="perfil-loading">Cargando favoritos...</p>;
+  if (error) return <p className="perfil-error">{error}</p>;
 
   return (
     <div className="channel-list">
       {favoritos.length === 0 ? (
-        <p>No tienes canales favoritos aún</p>
+        <p className="favoritos-empty">No tienes canales favoritos aún</p>
       ) : (
         favoritos.map((favorite) => (
           <div key={favorite.id} className="channel-card">
@@ -105,7 +109,7 @@ const ListaFavoritos = ({ jwtToken, onRemoveFavorite }) => {
             <p>{favorite.name || 'Canal desconocido'}</p>
             <button
               onClick={() => handleRemoveFavorite(favorite.id)}
-              className="btn btn-danger"
+              className="btn-remove"
             >
               Eliminar
             </button>
