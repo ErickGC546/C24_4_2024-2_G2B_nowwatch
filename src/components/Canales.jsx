@@ -13,6 +13,8 @@ export const Canales = () => {
   const [visibleChannels, setVisibleChannels] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoadingStream, setIsLoadingStream] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -20,6 +22,8 @@ export const Canales = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const playerRef = useRef(null);
   const videoRef = useRef(null);
+  const hlsRef = useRef(null);
+  const loadTimeoutRef = useRef(null);
   const hideControlsTimer = useRef(null);
 
   useEffect(() => {
@@ -46,15 +50,97 @@ export const Canales = () => {
   }, []);
 
   useEffect(() => {
-    if (currentChannel && currentChannel.url) {
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(currentChannel.url);
-        hls.attachMedia(videoRef.current);
-      } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-        videoRef.current.src = currentChannel.url;
-      }
+    const video = videoRef.current;
+    setErrorMessage('');
+
+    if (!currentChannel || !currentChannel.url || !video) {
+      return () => {};
     }
+
+    setIsLoadingStream(true);
+    setIsPlaying(false);
+
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    if (loadTimeoutRef.current) {
+      clearTimeout(loadTimeoutRef.current);
+    }
+
+    video.removeAttribute('src');
+    video.load();
+
+    const handleTimeout = () => {
+      setIsLoadingStream(false);
+      setErrorMessage('Problema con la conexión del canal.');
+    };
+    loadTimeoutRef.current = setTimeout(handleTimeout, 30000);
+
+    const tryAutoplay = () => {
+      if (!video) return;
+      video.play().catch(() => {
+        // If the browser blocks autoplay with sound, mute and retry once.
+        video.muted = true;
+        setIsMuted(true);
+        video.play().catch(() => {});
+      });
+    };
+
+    const markReady = () => {
+      clearTimeout(loadTimeoutRef.current);
+      setIsLoadingStream(false);
+      setErrorMessage('');
+      tryAutoplay();
+    };
+
+    const markError = () => {
+      clearTimeout(loadTimeoutRef.current);
+      setIsLoadingStream(false);
+      setErrorMessage('No se puede reproducir este canal en este momento.');
+    };
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hlsRef.current = hls;
+
+      hls.on(Hls.Events.MANIFEST_PARSED, markReady);
+      hls.on(Hls.Events.ERROR, () => {
+        markError();
+      });
+
+      hls.loadSource(currentChannel.url);
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      const handleCanPlay = () => {
+        markReady();
+        video.removeEventListener('canplay', handleCanPlay);
+      };
+
+      const handleError = () => {
+        markError();
+        video.removeEventListener('error', handleError);
+      };
+
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('error', handleError);
+      video.src = currentChannel.url;
+    } else {
+      markError();
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+      video.removeAttribute('src');
+      video.load();
+    };
   }, [currentChannel]);
 
   useEffect(() => {
@@ -121,7 +207,7 @@ export const Canales = () => {
         currentChannel = {
           name: info || 'Canal desconocido',
           url: '',
-          image: imageMatch ? imageMatch[1] : 'https://img.freepik.com/vector-premium/pictograma-tv-pantalla-television-icono-negro-redondo_53562-15456.jpg?w=740',
+          image: imageMatch ? imageMatch[1] : 'https://i.ibb.co/fGD9PvcR/Logo.png',
         };
       } else if (line.startsWith('http') || line.startsWith('rtsp')) {
         currentChannel.url = line;
@@ -144,6 +230,8 @@ export const Canales = () => {
   };
 
   const handleChannelChange = (channel) => {
+    setErrorMessage('');
+    setIsLoadingStream(true);
     setCurrentChannel(channel);
 
     window.scrollTo({
@@ -196,6 +284,7 @@ export const Canales = () => {
               onMouseMove={showControlsTemporarily}
               onMouseLeave={() => isFullscreen && setControlsVisible(false)}
               onClick={showControlsTemporarily}
+              style={{ position: 'relative' }}
             >
               <video
                 ref={videoRef}
@@ -219,6 +308,46 @@ export const Canales = () => {
                   setVolume(video.volume ?? 0.8);
                 }}
               />
+              {isLoadingStream && (
+                <div
+                  className="video-overlay"
+                  aria-live="polite"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.55)',
+                    color: '#fff',
+                    fontWeight: 600,
+                    zIndex: 2,
+                  }}
+                >
+                  <span>Cargando canal...</span>
+                </div>
+              )}
+              {errorMessage && !isLoadingStream && (
+                <div
+                  className="video-overlay"
+                  role="alert"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.65)',
+                    color: '#fff',
+                    fontWeight: 600,
+                    zIndex: 2,
+                    textAlign: 'center',
+                    padding: '0 1rem',
+                  }}
+                >
+                  <span>{errorMessage}</span>
+                </div>
+              )}
               <div
                 className={`video-controls ${isFullscreen && !controlsVisible ? 'hidden' : ''}`}
                 role="group"
@@ -300,8 +429,9 @@ export const Canales = () => {
                 className={`channel-card ${currentChannel === channel ? 'active' : ''}`}
               >
                 <img
-                  src={channel.image}
+                  src={channel.image || 'https://i.ibb.co/fGD9PvcR/Logo.png'}
                   alt={`Imagen del canal ${channel.name}`}
+                  onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = 'https://i.ibb.co/fGD9PvcR/Logo.png'; }}
                   className="channel-image"
                 />
                 <p>{channel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</p>

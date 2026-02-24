@@ -220,3 +220,68 @@
   list-style: none;
 }
 
+.nw-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  z-index: 1400;
+  padding: 16px;
+}
+
+.nw-dialog {
+  width: min(420px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
+  color: var(--text);
+}
+
+.nw-dialog h4 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.nw-dialog-body {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.nw-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.nw-btn {
+  border: 1px solid var(--stroke);
+  background: var(--panel);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.nw-btn:hover {
+  border-color: var(--accent);
+  color: #000;
+  background: var(--accent);
+}
+
+.nw-btn.ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+.nw-btn.danger {
+  border-color: #ff6b6b;
+  background: #ff6b6b;
+  color: #0b0b0b;
+}
+

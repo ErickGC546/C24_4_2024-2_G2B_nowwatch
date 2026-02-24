@@ -1,0 +1,25 @@
+.nw-footer {
+  margin-top: auto;
+  padding: 48px 24px 28px;
+}
+
+.nw-footer-bottom {
+  max-width: 1200px;
+  margin: 32px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--stroke);
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+
+@media (max-width: 640px) {
+  .nw-footer {
+    padding: 40px 18px 24px;
+  }
+
+  .nw-footer-shell {
+    gap: 22px;
+  }
+}

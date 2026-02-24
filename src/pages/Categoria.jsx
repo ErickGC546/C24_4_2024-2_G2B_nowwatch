@@ -1,8 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Hls from 'hls.js';
+import { useSnackbar } from 'notistack';
 import { fetchChannels } from '../services/channelService';
+import { listenToAuthChanges } from '../firebase';
+import { addFavorite, fetchFavorites, removeFavorite } from '../services/favoritesService';
 import '../styles/Categoria.css';
-import { FaPlay, FaPause, FaVolumeUp, FaVolumeDown, FaExpand } from 'react-icons/fa';
+import { FaPlay, FaPause, FaVolumeUp, FaVolumeDown, FaExpand, FaStar } from 'react-icons/fa';
+
+const FALLBACK_IMAGE = 'https://i.ibb.co/fGD9PvcR/Logo.png';
 
 export const Categorias = () => {
   const [channels, setChannels] = useState([]);
@@ -12,13 +17,43 @@ export const Categorias = () => {
   const [currentChannel, setCurrentChannel] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoadingStream, setIsLoadingStream] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [favorites, setFavorites] = useState([]);
   const playerRef = useRef(null);
   const videoRef = useRef(null);
+  const hlsRef = useRef(null);
+  const loadTimeoutRef = useRef(null);
   const hideControlsTimer = useRef(null);
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const unsubscribe = listenToAuthChanges((user) => setCurrentUser(user));
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (!currentUser) {
+        setFavorites([]);
+        return;
+      }
+      try {
+        const favs = await fetchFavorites(currentUser.uid);
+        setFavorites(favs.map((fav) => ({ id: fav.id, url: fav.url })));
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        enqueueSnackbar('No se pudieron cargar tus favoritos', { variant: 'warning' });
+      }
+    };
+
+    loadFavorites();
+  }, [currentUser, enqueueSnackbar]);
 
   useEffect(() => {
     const loadChannels = async () => {
@@ -62,13 +97,105 @@ export const Categorias = () => {
 
   useEffect(() => {
     if (currentChannel && currentChannel.url) {
+      const video = videoRef.current;
+      setErrorMessage('');
+
+      if (!video) {
+        return () => {};
+      }
+
+      setIsLoadingStream(true);
+      setIsPlaying(false);
+
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+
+      video.removeAttribute('src');
+      video.load();
+
+      const handleTimeout = () => {
+        setIsLoadingStream(false);
+        setErrorMessage('Problema con la conexion del canal.');
+      };
+
+      loadTimeoutRef.current = setTimeout(handleTimeout, 30000);
+
+      const tryAutoplay = () => {
+        video.play().catch(() => {
+          video.muted = true;
+          setIsMuted(true);
+          video.play().catch(() => {});
+        });
+      };
+
+      const markReady = () => {
+        clearTimeout(loadTimeoutRef.current);
+        setIsLoadingStream(false);
+        setErrorMessage('');
+        tryAutoplay();
+      };
+
+      const markError = () => {
+        clearTimeout(loadTimeoutRef.current);
+        setIsLoadingStream(false);
+        setErrorMessage('No se puede reproducir este canal en este momento.');
+      };
+
+      let nativeCanPlayHandler = null;
+      let nativeErrorHandler = null;
+
       if (Hls.isSupported()) {
         const hls = new Hls();
+        hlsRef.current = hls;
+
+        hls.on(Hls.Events.MANIFEST_PARSED, markReady);
+        hls.on(Hls.Events.ERROR, () => {
+          markError();
+        });
+
         hls.loadSource(currentChannel.url);
-        hls.attachMedia(videoRef.current);
-      } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-        videoRef.current.src = currentChannel.url;
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        nativeCanPlayHandler = () => {
+          markReady();
+          video.removeEventListener('canplay', nativeCanPlayHandler);
+        };
+
+        nativeErrorHandler = () => {
+          markError();
+          video.removeEventListener('error', nativeErrorHandler);
+        };
+
+        video.addEventListener('canplay', nativeCanPlayHandler);
+        video.addEventListener('error', nativeErrorHandler);
+        video.src = currentChannel.url;
+      } else {
+        markError();
       }
+
+      return () => {
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
+        if (loadTimeoutRef.current) {
+          clearTimeout(loadTimeoutRef.current);
+        }
+        if (nativeCanPlayHandler) {
+          video.removeEventListener('canplay', nativeCanPlayHandler);
+        }
+        if (nativeErrorHandler) {
+          video.removeEventListener('error', nativeErrorHandler);
+        }
+        video.removeAttribute('src');
+        video.load();
+      };
     }
   }, [currentChannel]);
 
@@ -138,7 +265,7 @@ export const Categorias = () => {
           name: info || 'Canal desconocido',
           category: groupMatch ? groupMatch[1] : 'Sin categoría',
           url: '',
-          image: imageMatch ? imageMatch[1] : 'https://img.freepik.com/vector-premium/pictograma-tv-pantalla-television-icono-negro-redondo_53562-15456.jpg?w=740',
+          image: imageMatch ? imageMatch[1] : FALLBACK_IMAGE,
         };
       } else if (line.startsWith('http') || line.startsWith('rtsp')) {
         currentChannel.url = line;
@@ -173,6 +300,31 @@ export const Categorias = () => {
         category.toLowerCase().includes(term.toLowerCase())
       );
       setFilteredCategories(filtered);
+    }
+  };
+
+  const toggleFavorite = async (channel) => {
+    if (!currentUser) {
+      enqueueSnackbar('Inicia sesión para gestionar favoritos', { variant: 'info' });
+      return;
+    }
+
+    const existing = favorites.find((fav) => fav.url === channel.url);
+
+    try {
+      if (existing) {
+        await removeFavorite(currentUser.uid, existing.id);
+        setFavorites((prev) => prev.filter((fav) => fav.id !== existing.id));
+        enqueueSnackbar('Canal eliminado de favoritos', { variant: 'default' });
+      } else {
+        const result = await addFavorite(currentUser.uid, channel.url);
+        const newId = result.id || `${Date.now()}-${channel.url}`;
+        setFavorites((prev) => [...prev, { id: newId, url: channel.url }]);
+        enqueueSnackbar('Canal agregado a favoritos', { variant: 'success' });
+      }
+    } catch (error) {
+      console.error('Error al gestionar favorito:', error);
+      enqueueSnackbar('Hubo un error al actualizar favoritos', { variant: 'error' });
     }
   };
 
@@ -213,7 +365,13 @@ export const Categorias = () => {
                   className="categorias-video"
                   controls={false}
                   playsInline
-                  onError={() => alert('No se pudo reproducir este canal.')}
+                  onError={() => {
+                    setIsLoadingStream(false);
+                    setErrorMessage('No se puede reproducir este canal en este momento.');
+                    if (loadTimeoutRef.current) {
+                      clearTimeout(loadTimeoutRef.current);
+                    }
+                  }}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                   onLoadedMetadata={() => {
@@ -229,6 +387,46 @@ export const Categorias = () => {
                     setVolume(video.volume ?? 0.8);
                   }}
                 />
+                {isLoadingStream && (
+                  <div
+                    className="video-overlay"
+                    aria-live="polite"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0,0,0,0.55)',
+                      color: '#fff',
+                      fontWeight: 600,
+                      zIndex: 2,
+                    }}
+                  >
+                    <span>Cargando canal...</span>
+                  </div>
+                )}
+                {errorMessage && !isLoadingStream && (
+                  <div
+                    className="video-overlay"
+                    role="alert"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      fontWeight: 600,
+                      zIndex: 2,
+                      textAlign: 'center',
+                      padding: '0 1rem',
+                    }}
+                  >
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
                 <div
                   className={`video-controls ${isFullscreen && !controlsVisible ? 'hidden' : ''}`}
                   role="group"
@@ -301,11 +499,24 @@ export const Categorias = () => {
                         onClick={() => handleChannelChange(channel)}
                       >
                         <img
-                          src={channel.image}
+                          src={channel.image || FALLBACK_IMAGE}
                           alt={channel.name}
+                          onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = FALLBACK_IMAGE; }}
                           className="categorias-channel-image"
                         />
                         <p className="categorias-channel-name">{channel.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</p>
+                        <div className="btn-container">
+                          <button
+                            className="btn-favoritos"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(channel);
+                            }}
+                          >
+                            <FaStar className="icono-favorito" />
+                            {favorites.some((fav) => fav.url === channel.url) ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+                          </button>
+                        </div>
                       </div>
                     ))
                   ) : (

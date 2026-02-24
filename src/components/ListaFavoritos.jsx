@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 import { listenToAuthChanges } from '../firebase';
 import { fetchChannels } from '../services/channelService';
 import { fetchFavorites, removeFavorite } from '../services/favoritesService';
+
+const FALLBACK_IMAGE = 'https://i.ibb.co/fGD9PvcR/Logo.png';
 
 const ListaFavoritos = () => {
   const [favoritos, setFavoritos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const unsubscribe = listenToAuthChanges((user) => setCurrentUser(user));
@@ -39,7 +45,7 @@ const ListaFavoritos = () => {
             name: canalDetalles ? canalDetalles.name : 'Canal desconocido',
             image: canalDetalles
               ? canalDetalles.image
-              : 'https://via.placeholder.com/150',
+              : FALLBACK_IMAGE,
           };
         });
 
@@ -69,7 +75,7 @@ const ListaFavoritos = () => {
           url: '',
           image: imageMatch
             ? imageMatch[1]
-            : 'https://via.placeholder.com/150',
+            : FALLBACK_IMAGE,
         };
       } else if (line.startsWith('http') || line.startsWith('rtsp')) {
         currentChannel.url = line;
@@ -86,8 +92,10 @@ const ListaFavoritos = () => {
     try {
       await removeFavorite(currentUser.uid, favoriteId);
       setFavoritos(favoritos.filter((fav) => fav.id !== favoriteId));
+      enqueueSnackbar('Canal eliminado de favoritos', { variant: 'default' });
     } catch (error) {
       console.error('Error al eliminar favorito:', error);
+      enqueueSnackbar('No se pudo eliminar el favorito', { variant: 'error' });
     }
   };
 
@@ -100,15 +108,28 @@ const ListaFavoritos = () => {
         <p className="favoritos-empty">No tienes canales favoritos aún</p>
       ) : (
         favoritos.map((favorite) => (
-          <div key={favorite.id} className="channel-card">
+          <div
+            key={favorite.id}
+            className="channel-card"
+            onClick={() => navigate('/', { state: { channelUrl: favorite.url } })}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate('/', { state: { channelUrl: favorite.url } });
+              }
+            }}
+          >
             <img
-              src={favorite.image || 'https://via.placeholder.com/150'}
+              src={favorite.image || FALLBACK_IMAGE}
               alt={favorite.name || 'Canal Favorito'}
+              onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = FALLBACK_IMAGE; }}
               className="channel-image"
             />
-            <p>{favorite.name || 'Canal desconocido'}</p>
+            <p>{favorite.name.replace(/\s*[\(\[].*?[\)\]]/g, '')}</p>
             <button
-              onClick={() => handleRemoveFavorite(favorite.id)}
+              onClick={(e) => { e.stopPropagation(); handleRemoveFavorite(favorite.id); }}
               className="btn-remove"
             >
               Eliminar

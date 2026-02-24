@@ -34,6 +34,16 @@ body {
 	min-height: 100vh;
 }
 
+.app-shell {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.app-content {
+	flex: 0 0 auto;
+}
+
 a {
 	color: inherit;
 	text-decoration: none;

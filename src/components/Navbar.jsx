@@ -7,6 +7,7 @@ const Navbar = () => {
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const [error, setError] = useState(null);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -42,13 +43,15 @@ const Navbar = () => {
         }
     };
 
-    const handleLogout = async () => {
+    const confirmLogout = async () => {
         try {
             await logout();
             navigate('/');
         } catch (err) {
             console.error('Error al cerrar sesión:', err);
             setError('No se pudo cerrar sesión');
+        } finally {
+            setShowLogoutConfirm(false);
         }
     };
 
@@ -94,7 +97,7 @@ const Navbar = () => {
                             type="button"
                             className="nw-user-chip"
                             aria-label={userProfile ? 'Cerrar sesión' : 'Iniciar sesión con Google'}
-                            onClick={userProfile ? handleLogout : handleLogin}
+                            onClick={userProfile ? () => setShowLogoutConfirm(true) : handleLogin}
                         >
                             <img 
                                 src={userProfile?.photo || FALLBACK_AVATAR}
@@ -108,6 +111,22 @@ const Navbar = () => {
                 </div>
             </nav>
             <Outlet />
+            {showLogoutConfirm && (
+                <div className="nw-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+                    <div className="nw-dialog">
+                        <h4 id="logout-title">¿Deseas cerrar sesión?</h4>
+                        <p className="nw-dialog-body">Tu sesión se cerrará y volverás a la página principal.</p>
+                        <div className="nw-dialog-actions">
+                            <button type="button" className="nw-btn ghost" onClick={() => setShowLogoutConfirm(false)}>
+                                No, continuar aquí
+                            </button>
+                            <button type="button" className="nw-btn danger" onClick={confirmLogout}>
+                                Sí, cerrar sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
